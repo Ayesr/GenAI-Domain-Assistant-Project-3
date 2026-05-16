@@ -128,6 +128,6 @@ This project demonstrates how Large Language Models combined with prompt enginee
 ---
 
 ##  Author
-**Ayesha Ameer**
+**Ayesha Ameer** ,
 **email: shaheenaameer2003@gmail.com**
 AI/ML & Electromagnetics Researcher | GenAI Developer
