@@ -1,6 +1,6 @@
-# 🚀 GenAI Domain Assistant Project (Chatbot System)
+#  GenAI Domain Assistant Project (Chatbot System)
 
-## 📌 Overview
+##  Overview
 This project demonstrates the development of **AI-powered domain-specific chatbots** using Large Language Models (LLMs). The system enables organizations to access and retrieve internal knowledge efficiently through natural language queries.
 
 It includes both:
@@ -11,7 +11,7 @@ The focus is on building **intelligent assistants for enterprise knowledge acces
 
 
 
-## 🎯 Key Objectives
+##  Key Objectives
 - Build role-based AI chatbots using LLMs
 - Apply prompt engineering for controlled behavior
 - Implement Retrieval-Augmented Generation (RAG)
@@ -21,9 +21,9 @@ The focus is on building **intelligent assistants for enterprise knowledge acces
 
 
 
-## 🤖 Chatbots Implemented
+##  Chatbots Implemented
 
-### 🧑‍💼 HR Assistant Chatbot
+###  HR Assistant Chatbot
 A domain-specific assistant designed to answer HR policy-related questions.
 
 **Features:**
@@ -35,7 +35,7 @@ A domain-specific assistant designed to answer HR policy-related questions.
 
 
 
-### 🛠️ Customer Support Chatbot (TechShop)
+###  Customer Support Chatbot (TechShop)
 An AI support assistant for an electronics retail environment.
 
 **Features:**
@@ -47,7 +47,7 @@ An AI support assistant for an electronics retail environment.
 
 
 
-### 📄 RAG-Based Knowledge Assistant
+###  RAG-Based Knowledge Assistant
 An advanced chatbot that retrieves answers from internal documents using a **Retrieval-Augmented Generation (RAG)** pipeline.
 
 **Pipeline:**
@@ -67,7 +67,7 @@ An advanced chatbot that retrieves answers from internal documents using a **Ret
 
 
 
-## 🧠 System Architecture
+##  System Architecture
 User Query
 ↓
 Retrieval Module (Simple Search / Future: Embeddings)
@@ -83,7 +83,7 @@ Final Answer
 
 
 
-## 🛠️ Technologies Used
+##  Technologies Used
 - Python 🐍
 - OpenAI API / OpenRouter API
 - GPT-3.5-Turbo / GPT-4o-mini
@@ -93,7 +93,7 @@ Final Answer
 
 
 
-## 📊 Key Features
+##  Key Features
 - Role-based chatbot behavior via system prompts
 - Domain-specific assistants (HR, Support, Knowledge Base)
 - Document-based question answering (RAG pipeline)
@@ -103,7 +103,7 @@ Final Answer
 
 
 
-## 📈 Project Outcomes
+##  Project Outcomes
 - Understanding of how prompt engineering controls AI behavior
 - Development of real-world chatbot systems
 - Implementation of RAG-based knowledge retrieval
@@ -112,7 +112,7 @@ Final Answer
 
 
 
-## 🚀 Future Improvements
+##  Future Improvements
 - Replace keyword search with semantic embeddings (FAISS / ChromaDB)
 - Add conversation memory for multi-turn dialogue
 - Build web interface using Streamlit / Flask
@@ -122,12 +122,12 @@ Final Answer
 
 
 
-## 🧾 Conclusion
+##  Conclusion
 This project demonstrates how Large Language Models combined with prompt engineering and retrieval systems can be used to build intelligent domain-specific assistants. It showcases the evolution from basic chatbots to **context-aware AI systems capable of enterprise deployment**.
 
 ---
 
-## 👩‍💻 Author
+##  Author
 **Ayesha Ameer**
 **email: shaheenaameer2003@gmail.com**
 AI/ML & Electromagnetics Researcher | GenAI Developer
