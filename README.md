@@ -270,19 +270,19 @@ Semantic Search ✔
 
 ### 🚀 Install Streamlit
 ```bash
-pip install streamlit
+pip install streamlit ```
 
-```pip install -r requirements.txt
+```pip install -r requirements.txt ```
 
 Run Streamlit App (Localhost)
 
-```streamlit run app.py
+```streamlit run app.py ```
 
 Open in Browser
-```http://localhost:8501/
+```http://localhost:8501/ ```
 
 Run on Public Server (VPS / Cloud VM)
-```streamlit run app1.py --server.address 0.0.0.0 --server.port 8501
+```streamlit run app1.py --server.address 0.0.0.0 --server.port 8501 ```
 
 ##  Conclusion
 This project demonstrates how Large Language Models combined with prompt engineering and retrieval systems can be used to build intelligent domain-specific assistants. It showcases the evolution from basic chatbots to **context-aware AI systems capable of enterprise deployment**.
