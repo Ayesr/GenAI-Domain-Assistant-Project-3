@@ -269,7 +269,7 @@ Semantic Search ✔
 
 
 ### 🚀 Install Streamlit
-```bash
+```
 pip install streamlit ```
 
 ```pip install -r requirements.txt ```
