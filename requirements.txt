@@ -1,14 +1,12 @@
 # =========================
-# Core LLM & OpenRouter
+# Core LLM / OpenRouter API
 # =========================
 openai>=1.30.0
 
 # =========================
-# LangChain Ecosystem
+# Streamlit App
 # =========================
-langchain>=0.2.0
-langchain-community>=0.2.0
-langchain-text-splitters>=0.2.0
+streamlit>=1.35.0
 
 # =========================
 # Environment Variables
@@ -16,33 +14,35 @@ langchain-text-splitters>=0.2.0
 python-dotenv>=1.0.0
 
 # =========================
-# Tokenization
+# LangChain (light usage only)
+# =========================
+langchain>=0.2.0
+langchain-openai>=0.1.0
+langchain-community>=0.2.0
+langchain-text-splitters>=0.2.0
+
+# =========================
+# Vector Database
+# =========================
+chromadb>=0.5.0
+
+# =========================
+# Embeddings Support (OpenRouter / requests-based)
+# =========================
+requests>=2.31.0
+
+# =========================
+# Text Processing
 # =========================
 tiktoken>=0.7.0
 
 # =========================
-# Document Loading
+# Document Handling
 # =========================
 pypdf>=4.2.0
 
 # =========================
-# Vector Database (Future RAG Upgrade)
-# =========================
-faiss-cpu>=1.8.0
-
-# =========================
-# Embeddings / Semantic Search
-# =========================
-sentence-transformers>=2.7.0
-
-# =========================
-# Data Processing
+# Data Processing (optional but useful)
 # =========================
 numpy>=1.26.0
 pandas>=2.2.0
-
-# =========================
-# Optional Web App Deployment
-# =========================
-streamlit>=1.35.0
-flask>=3.0.0
