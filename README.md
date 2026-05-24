@@ -269,8 +269,8 @@ Semantic Search ✔
 
 
 ### 🚀 Install Streamlit
-```
-pip install streamlit ```
+
+```pip install streamlit ```
 
 ```pip install -r requirements.txt ```
 
