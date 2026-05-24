@@ -85,7 +85,7 @@ Prompt Construction (Context + Query)
 LLM (GPT-3.5 via OpenRouter)
    ↓
 Final Answer
-
+```
 
 
 ##  Technologies Used
