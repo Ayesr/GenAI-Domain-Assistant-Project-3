@@ -6,6 +6,8 @@ from dotenv import load_dotenv
 from chromadb.api.types import EmbeddingFunction
 from langchain_openai import ChatOpenAI
 
+
+os.environ["PROTOCOL_BUFFERS_PYTHON_IMPLEMENTATION"] = "python"
 # =========================================================
 # PAGE CONFIG
 # =========================================================
