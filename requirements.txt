@@ -1,48 +1,60 @@
 # =========================
+# Python compatibility note:
+# Use Python 3.10 or 3.11 (IMPORTANT)
+# =========================
+
+# =========================
 # Core LLM / OpenRouter API
 # =========================
-openai>=1.30.0
+openai>=1.30.0,<2.0.0
 
 # =========================
 # Streamlit App
 # =========================
-streamlit>=1.35.0
+streamlit>=1.35.0,<2.0.0
 
 # =========================
 # Environment Variables
 # =========================
-python-dotenv>=1.0.0
+python-dotenv>=1.0.0,<2.0.0
 
 # =========================
-# LangChain (light usage only)
+# LangChain (light usage)
 # =========================
-langchain>=0.2.0
-langchain-openai>=0.1.0
-langchain-community>=0.2.0
-langchain-text-splitters>=0.2.0
+langchain>=0.2.0,<0.3.0
+langchain-openai>=0.1.0,<0.2.0
+langchain-community>=0.2.0,<0.3.0
+langchain-text-splitters>=0.2.0,<0.3.0
 
 # =========================
-# Vector Database
+# Vector Database (ChromaDB - FIXED VERSION)
 # =========================
-chromadb>=0.5.0
+chromadb==0.5.3
 
 # =========================
-# Embeddings Support (OpenRouter / requests-based)
+# Fix protobuf / telemetry crash (IMPORTANT)
 # =========================
-requests>=2.31.0
+protobuf==4.25.3
+opentelemetry-api==1.20.0
+opentelemetry-sdk==1.20.0
+
+# =========================
+# Embeddings / API calls
+# =========================
+requests>=2.31.0,<3.0.0
 
 # =========================
 # Text Processing
 # =========================
-tiktoken>=0.7.0
+tiktoken>=0.7.0,<1.0.0
 
 # =========================
 # Document Handling
 # =========================
-pypdf>=4.2.0
+pypdf>=4.2.0,<5.0.0
 
 # =========================
-# Data Processing (optional but useful)
+# Data Processing
 # =========================
-numpy>=1.26.0
-pandas>=2.2.0
+numpy<2.0.0
+pandas>=2.2.0,<3.0.0
