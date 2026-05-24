@@ -1,0 +1,13 @@
+IT & Security Policy
+
+Password Policy:
+Employees must use strong passwords and change them every 90 days.
+
+Device Usage:
+Company devices should be used for work-related tasks only.
+
+Data Security:
+Do not share confidential company data externally without approval.
+
+Software Installation:
+Only approved software may be installed on company systems.
