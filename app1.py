@@ -105,22 +105,32 @@ collection = init_chromadb()
 llm = init_llm()
 
 # =========================================================
-# RAG FUNCTION (SAFE VERSION)
+# RAG FUNCTION (HYBRID SEMANTIC VS KEYWORD MODES)
 # =========================================================
-def get_rag_response(query, n_results=3):
+def get_rag_response(query, n_results=3, search_mode="Semantic Search"):
     try:
         # Check if database has files before querying to prevent index panics
         if collection.count() == 0:
             return "⚠️ The knowledge base is currently empty. Please drop policy files into the folder uploader in the sidebar."
 
-        results = collection.query(
-            query_texts=[query],
-            n_results=n_results
-        )
-        docs = results.get("documents")
+        # Execute search strategy based on user selection
+        if search_mode == "Keyword Search":
+            # 🔑 KEYWORD MATCHING: Literal character substring scan using Chroma's where_document filter
+            results = collection.get(
+                where_document={"$contains": query},
+                limit=n_results
+            )
+            docs = [results.get("documents", [])]
+        else:
+            # 🧠 SEMANTIC RETRIEVAL: High-dimensional vector cosine distance matching
+            results = collection.query(
+                query_texts=[query],
+                n_results=n_results
+            )
+            docs = results.get("documents")
 
-        if not docs or not docs[0] or not docs[0][0].strip():
-            return "❌ No relevant information found in our company documents."
+        if not docs or not docs[0] or len(docs[0]) == 0 or not docs[0][0].strip():
+            return f"❌ No relevant information found using {search_mode} matching paths."
 
         docs = docs[0]
         context = "\n\n---\n\n".join(docs)
@@ -160,14 +170,14 @@ with st.sidebar:
     st.caption("RAG Pipeline Engine")
     
     st.markdown("""
-    - **Search Engine:** Semantic Vector Match
+    - **Search Engine:** Hybrid Processing
     - **Database:** Local ChromaDB Context
     - **LLM Endpoint:** OpenRouter Gateway
     """)
     st.divider()
 
-    # 🏢 DIRECT FOLDER/FILE INGESTION CONTROL INTERFACE
-    st.subheader("📁 Upload Company Knowledge")
+    # 🏢 DIRECT FOLDER/FILE INGESTION CONTROL INTERFACE (Syntax Error Resolved)
+    st.subheader("Upload Company Knowledge")
     
     # Drag and drop or browse multiple files simultaneously
     uploaded_files = st.file_uploader(
@@ -250,6 +260,14 @@ for msg in st.session_state.messages:
 # =========================================================
 # CHAT INPUT & EXECUTION
 # =========================================================
+# Interactive Strategy Engine Selector
+search_strategy = st.radio(
+    "Select Context Search Strategy:",
+    options=["Semantic Search", "Keyword Search"],
+    horizontal=True,
+    help="Semantic handles underlying meaning context. Keyword strictly scans for literal character phrase matches."
+)
+
 if prompt := st.chat_input("Ask a question about company policies..."):
 
     st.session_state.messages.append({"role": "user", "content": prompt})
@@ -258,8 +276,8 @@ if prompt := st.chat_input("Ask a question about company policies..."):
         st.write(prompt)
 
     with st.chat_message("assistant"):
-        with st.spinner("Searching database & generating answer..."):
-            response = get_rag_response(prompt)
+        with st.spinner(f"Running context map ({search_strategy})..."):
+            response = get_rag_response(prompt, search_mode=search_strategy)
         st.write(response)
 
     st.session_state.messages.append({"role": "assistant", "content": response})
