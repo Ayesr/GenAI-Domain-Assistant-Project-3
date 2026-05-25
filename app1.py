@@ -17,7 +17,9 @@ except ImportError:
 
 import streamlit as st
 import chromadb
+from chromadb.config import Settings
 import requests
+import pypdf
 from chromadb.api.types import EmbeddingFunction
 from langchain_openai import ChatOpenAI
 
@@ -68,11 +70,14 @@ class OpenRouterEmbeddingFunction(EmbeddingFunction):
         ]
 
 # =========================================================
-# CHROMADB INIT
+# CHROMADB INIT (Safe Singleton Configuration)
 # =========================================================
 @st.cache_resource
 def init_chromadb():
-    client = chromadb.PersistentClient(path="./chroma_db")
+    client = chromadb.PersistentClient(
+        path="./chroma_db",
+        settings=Settings(allow_reset=True, anonymized_telemetry=False)
+    )
     embedding_fn = OpenRouterEmbeddingFunction(
         api_key=OPENROUTER_API_KEY,
         model="openai/text-embedding-3-small"
@@ -88,7 +93,7 @@ def init_chromadb():
 @st.cache_resource
 def init_llm():
     return ChatOpenAI(
-        model="meta-llama/llama-3-70b-instruct",  # Upgraded to your preferred model
+        model="meta-llama/llama-3-70b-instruct",
         temperature=0.2,
         api_key=OPENROUTER_API_KEY,
         base_url="https://openrouter.ai/api/v1",
@@ -106,7 +111,7 @@ def get_rag_response(query, n_results=3):
     try:
         # Check if database has files before querying to prevent index panics
         if collection.count() == 0:
-            return "⚠️ The knowledge base is currently empty. Please add context chunks using the Admin panel in the sidebar."
+            return "⚠️ The knowledge base is currently empty. Please drop policy files into the folder uploader in the sidebar."
 
         results = collection.query(
             query_texts=[query],
@@ -148,7 +153,7 @@ if "messages" not in st.session_state:
     st.session_state.messages = []
 
 # =========================================================
-# SIDEBAR (STYLING & INGESTION MODIFICATIONS)
+# SIDEBAR (FOLDER & MULTI-FILE DOCUMENT UPLOADER)
 # =========================================================
 with st.sidebar:
     st.title("🤖 AI HR Assistant")
@@ -161,70 +166,5 @@ with st.sidebar:
     """)
     st.divider()
 
-    # 🏢 RAG INGESTION CONTROL INTERFACE
-    st.subheader("📝 Ingest Knowledge")
-    with st.expander("Add Documents to DB", expanded=False):
-        doc_id = st.text_input("Doc Unique ID (e.g., leave_policy)")
-        doc_content = st.text_area("Paste Content Text", height=150)
-        
-        if st.button("Save to Vector Space", use_container_width=True):
-            if doc_id.strip() and doc_content.strip():
-                with st.spinner("Calculating vector layouts..."):
-                    try:
-                        collection.add(
-                            ids=[doc_id.strip()],
-                            documents=[doc_content.strip()],
-                            metadatas=[{"source": "admin_sidebar"}]
-                        )
-                        st.success(f"Successfully added '{doc_id}'!")
-                        st.utility_rerun if hasattr(st, "utility_rerun") else st.rerun()
-                    except Exception as ex:
-                        st.error(f"Ingestion failed: {ex}")
-            else:
-                st.warning("Both ID and Content fields are required.")
-
-    st.divider()
-
-    # Dynamic metrics tracker
-    col1, col2 = st.columns(2)
-    with col1:
-        st.metric("📄 Indexed Docs", collection.count())
-    with col2:
-        st.metric("💬 Messages", len(st.session_state.messages))
-
-    st.divider()
-
-    if st.button("🧹 Clear Chat History", use_container_width=True, type="primary"):
-        st.session_state.messages = []
-        st.rerun()
-
-# =========================================================
-# MAIN INTERFACE HEADER
-# =========================================================
-st.title("Company Knowledge Assistant")
-st.caption("Strategic RAG Analytics + Semantic Knowledge Base Mapping")
-st.markdown("---")
-
-# =========================================================
-# CHAT HISTORY DISPLAY
-# =========================================================
-for msg in st.session_state.messages:
-    with st.chat_message(msg["role"]):
-        st.write(msg["content"])
-
-# =========================================================
-# CHAT INPUT & EXECUTION
-# =========================================================
-if prompt := st.chat_input("Ask a question about company policies..."):
-
-    st.session_state.messages.append({"role": "user", "content": prompt})
-
-    with st.chat_message("user"):
-        st.write(prompt)
-
-    with st.chat_message("assistant"):
-        with st.spinner("Searching database & generating answer..."):
-            response = get_rag_response(prompt)
-        st.write(response)
-
-    st.session_state.messages.append({"role": "assistant", "content": response})
+    # 🏢 DIRECT FOLDER/FILE INGESTION CONTROL INTERFACE
+    st.subheader("📁
