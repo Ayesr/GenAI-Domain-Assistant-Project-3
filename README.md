@@ -283,7 +283,8 @@ Open in Browser
 
 Run on Public Server (VPS / Cloud VM)
 ```streamlit run app1.py --server.address 0.0.0.0 --server.port 8501 ```
-
+link to my HR Assistant Chatbot:
+```https://genai-domain-assistant-project-3-ayesha.streamlit.app/```
 ##  Conclusion
 This project demonstrates how Large Language Models combined with prompt engineering and retrieval systems can be used to build intelligent domain-specific assistants. It showcases the evolution from basic chatbots to **context-aware AI systems capable of enterprise deployment**.
 
