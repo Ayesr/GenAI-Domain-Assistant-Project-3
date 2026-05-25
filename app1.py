@@ -2,12 +2,27 @@ import os
 import streamlit as st
 import chromadb
 import requests
-from dotenv import load_dotenv
 from chromadb.api.types import EmbeddingFunction
-from langchain_openai import ChatOpenAI
+from langchain_openrouter import ChatOpenRouter
 
+# Force protobuf to fallback if necessary
 os.environ["PROTOCOL_BUFFERS_PYTHON_IMPLEMENTATION"] = "python"
-load_dotenv()
+
+# Securely grab the API key from Streamlit Secrets
+# (Make sure OPENROUTER_API_KEY is added to your app secrets in the dashboard)
+OPENROUTER_API_KEY = st.secrets["OPENROUTER_API_KEY"]
+
+# =========================================================
+# LLM INITIALIZATION
+# =========================================================
+@st.cache_resource
+def init_llm():
+    return ChatOpenRouter(
+        openrouter_api_key=OPENROUTER_API_KEY,
+        model="meta-llama/llama-3-70b-instruct",  # Or your preferred model path
+        temperature=0.7
+    )
+
 
 # =========================================================
 # EMBEDDINGS (OpenRouter)
@@ -18,6 +33,10 @@ class OpenRouterEmbeddingFunction(EmbeddingFunction):
         self.model = model
 
     def __call__(self, input):
+        # Handle single strings or lists of strings smoothly
+        if isinstance(input, str):
+            input = [input]
+            
         response = requests.post(
             "https://openrouter.ai/api/v1/embeddings",
             headers={
@@ -28,10 +47,9 @@ class OpenRouterEmbeddingFunction(EmbeddingFunction):
         )
 
         if response.status_code != 200:
-            raise ValueError(response.text)
+            raise ValueError(f"OpenRouter Embeddings Error: {response.text}")
 
         data = response.json()["data"]
-
         return [[float(x) for x in item["embedding"]] for item in data]
 
 
@@ -42,9 +60,7 @@ class OpenRouterEmbeddingFunction(EmbeddingFunction):
 def init_chromadb():
     client = chromadb.PersistentClient(path="./chroma_db")
 
-    embedding_fn = OpenRouterEmbeddingFunction(
-        api_key=os.getenv("OPENROUTER_API_KEY")
-    )
+    embedding_fn = OpenRouterEmbeddingFunction(api_key=OPENROUTER_API_KEY)
 
     return client.get_or_create_collection(
         name="company_docs",
@@ -52,28 +68,16 @@ def init_chromadb():
     )
 
 
-# =========================================================
-# LLM (FIXED)
-# =========================================================
-@st.cache_resource
-def init_llm():
-    return ChatOpenAI(
-        model="gpt-3.5-turbo",
-        api_key=os.getenv("OPENROUTER_API_KEY"),
-        base_url="https://openrouter.ai/api/v1/v1"  # ✅ FIXED PATH
-    )
-
-
+# Initialize Core Services
 collection = init_chromadb()
 llm = init_llm()
 
 
 # =========================================================
-# RAG
+# RAG LOGIC
 # =========================================================
 def get_rag_response(query, n_results=3):
     results = collection.query(query_texts=[query], n_results=n_results)
-
     docs = results.get("documents", [[]])[0]
 
     if not docs:
@@ -84,7 +88,7 @@ def get_rag_response(query, n_results=3):
     messages = [
         {
             "role": "system",
-            "content": "You are a professional HR assistant. Use ONLY context."
+            "content": "You are a professional HR assistant. Use ONLY the provided context to answer questions."
         },
         {
             "role": "user",
@@ -96,7 +100,7 @@ def get_rag_response(query, n_results=3):
 
 
 # =========================================================
-# STREAMLIT UI (MINIMAL FIXED CORE)
+# STREAMLIT UI
 # =========================================================
 st.title("Company Knowledge Assistant")
 
@@ -108,13 +112,14 @@ for msg in st.session_state.messages:
         st.write(msg["content"])
 
 if prompt := st.chat_input("Ask something..."):
-
     st.session_state.messages.append({"role": "user", "content": prompt})
+
+    with st.chat_message("user"):
+        st.write(prompt)
 
     with st.chat_message("assistant"):
         with st.spinner("Thinking..."):
             response = get_rag_response(prompt)
-
         st.write(response)
 
     st.session_state.messages.append({"role": "assistant", "content": response})
