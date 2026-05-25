@@ -4,6 +4,9 @@ import sys
 # =========================================================
 # 1. SYSTEM PATCHES (MUST RUN BEFORE ANY OTHER IMPORTS)
 # =========================================================
+# Disable background ChromaDB telemetry pings to clear logs
+os.environ["ANONYMIZED_TELEMETRY"] = "False"
+
 # Fix the Protobuf descriptor version conflict
 os.environ["PROTOCOL_BUFFERS_PYTHON_IMPLEMENTATION"] = "python"
 
@@ -87,21 +90,67 @@ llm = init_llm()
 
 
 # =========================================================
-# 5. RAG LOGIC
+# 5. ADMIN UTILITIES: SIDEBAR DATA INGESTION
+# =========================================================
+with st.sidebar:
+    st.header("🏢 HR Admin Panel")
+    st.subheader("Ingest Company Knowledge")
+    
+    # Text input for copy-pasting documentation details
+    doc_title = st.text_input("Document ID/Title (e.g., leave_policy_2026)")
+    doc_text = st.text_area("Paste Document Content Here", height=200)
+    
+    if st.button("Add to Knowledge Base"):
+        if doc_title.strip() and doc_text.strip():
+            with st.spinner("Embedding and storing text..."):
+                try:
+                    # Ingest document text straight into Chroma
+                    collection.add(
+                        ids=[doc_title.strip()],
+                        documents=[doc_text.strip()],
+                        metadatas=[{"source": "admin_ui"}]
+                    )
+                    st.success(f"Successfully added '{doc_title}'!")
+                    st.rerun()
+                except Exception as e:
+                    st.error(f"Ingestion failed: {e}")
+        else:
+            st.warning("Please fill out both the ID and Content fields.")
+            
+    st.markdown("---")
+    # Live database document counter
+    try:
+        current_count = collection.count()
+    except Exception:
+        current_count = 0
+    st.metric(label="Total Saved Knowledge Snippets", value=current_count)
+
+
+# =========================================================
+# 6. RAG LOGIC
 # =========================================================
 def get_rag_response(query, n_results=3):
+    # Safety Check: If database has no documents yet, intercept query gracefully
+    try:
+        if collection.count() == 0:
+            return "⚠️ The knowledge assistant is currently empty. Please add context chunks using the HR Admin Panel in the sidebar before searching."
+    except Exception:
+        pass
+
+    # Query Chroma using our custom OpenRouter embedding mapping
     results = collection.query(query_texts=[query], n_results=n_results)
     docs = results.get("documents", [[]])[0]
 
-    if not docs:
-        return "❌ No relevant information found."
+    # Fallback response if no close matrix match is found
+    if not docs or not docs[0].strip():
+        return "❌ No relevant information found in our company documents."
 
     context = "\n\n---\n\n".join(docs)
 
     messages = [
         {
             "role": "system",
-            "content": "You are a professional HR assistant. Use ONLY the provided context to answer questions."
+            "content": "You are a professional HR assistant. Use ONLY the provided context to answer questions. If the answer cannot be found or deduced from the context, state that you do not know."
         },
         {
             "role": "user",
@@ -113,7 +162,7 @@ def get_rag_response(query, n_results=3):
 
 
 # =========================================================
-# 6. STREAMLIT UI
+# 7. STREAMLIT UI (Chat Interface)
 # =========================================================
 st.title("Company Knowledge Assistant")
 
