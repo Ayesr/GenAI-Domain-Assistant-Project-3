@@ -3,6 +3,7 @@ import streamlit as st
 import chromadb
 import requests
 from chromadb.api.types import EmbeddingFunction
+from langchain_openai import ChatOpenAI
 from langchain_openrouter import ChatOpenRouter
 
 # Force protobuf to fallback if necessary
