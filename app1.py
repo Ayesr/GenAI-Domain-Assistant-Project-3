@@ -167,8 +167,7 @@ with st.sidebar:
     st.divider()
 
     # 🏢 DIRECT FOLDER/FILE INGESTION CONTROL INTERFACE
-    # 🏢 DIRECT FOLDER/FILE INGESTION CONTROL INTERFACE
-    st.subheader("Upload Company Knowledge")
+    st.subheader("📁 Upload Company Knowledge")
     
     # Drag and drop or browse multiple files simultaneously
     uploaded_files = st.file_uploader(
@@ -176,3 +175,91 @@ with st.sidebar:
         type=["pdf", "txt"], 
         accept_multiple_files=True
     )
+    
+    if uploaded_files:
+        if st.button("Process & Save to Vector Space", use_container_width=True, type="secondary"):
+            for uploaded_file in uploaded_files:
+                file_name = uploaded_file.name
+                
+                with st.spinner(f"Processing {file_name}..."):
+                    try:
+                        text_content = ""
+                        
+                        # 1. Parse PDF formats
+                        if file_name.endswith(".pdf"):
+                            pdf_reader = pypdf.PdfReader(uploaded_file)
+                            for page in pdf_reader.pages:
+                                page_text = page.extract_text()
+                                if page_text:
+                                    text_content += page_text + "\n"
+                        
+                        # 2. Parse Raw TXT formats
+                        elif file_name.endswith(".txt"):
+                            text_content = uploaded_file.read().decode("utf-8")
+                        
+                        # 3. Vectorize chunks and update DB collection
+                        if text_content.strip():
+                            collection.add(
+                                ids=[file_name],  # Uses file name as the unique key
+                                documents=[text_content.strip()],
+                                metadatas=[{"source": "local_upload", "filename": file_name}]
+                            )
+                            st.success(f"Indexed: {file_name}")
+                        else:
+                            st.warning(f"Skipped {file_name} (No readable text found).")
+                            
+                    except Exception as ex:
+                        st.error(f"Error reading {file_name}: {ex}")
+            
+            st.success("All files processed successfully!")
+            st.rerun()
+
+    st.divider()
+
+    # Dynamic metrics tracker
+    col1, col2 = st.columns(2)
+    with col1:
+        try:
+            doc_count = collection.count()
+        except Exception:
+            doc_count = 0
+        st.metric("📄 Indexed Docs", doc_count)
+    with col2:
+        st.metric("💬 Messages", len(st.session_state.messages))
+
+    st.divider()
+
+    if st.button("🧹 Clear Chat History", use_container_width=True, type="primary"):
+        st.session_state.messages = []
+        st.rerun()
+
+# =========================================================
+# MAIN INTERFACE HEADER
+# =========================================================
+st.title("Company Knowledge Assistant")
+st.caption("Strategic RAG Analytics + Semantic Knowledge Base Mapping")
+st.markdown("---")
+
+# =========================================================
+# CHAT HISTORY DISPLAY
+# =========================================================
+for msg in st.session_state.messages:
+    with st.chat_message(msg["role"]):
+        st.write(msg["content"])
+
+# =========================================================
+# CHAT INPUT & EXECUTION
+# =========================================================
+if prompt := st.chat_input("Ask a question about company policies..."):
+
+    st.session_state.messages.append({"role": "user", "content": prompt})
+
+    with st.chat_message("user"):
+        st.write(prompt)
+
+    with st.chat_message("assistant"):
+        with st.spinner("Searching database & generating answer..."):
+            response = get_rag_response(prompt)
+        st.write(response)
+
+    st.session_state.messages.append({"role": "assistant", "content": response})
