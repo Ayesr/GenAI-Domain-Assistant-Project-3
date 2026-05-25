@@ -1,22 +1,24 @@
-# =========================================================
-# 1. SYSTEM PATCH: CHROMADB SQLITE FIX FOR STREAMLIT CLOUD
-# =========================================================
+import os
 import sys
+
+# =========================================================
+# 1. SYSTEM PATCHES (MUST RUN BEFORE ANY OTHER IMPORTS)
+# =========================================================
+# Fix the Protobuf descriptor version conflict
+os.environ["PROTOCOL_BUFFERS_PYTHON_IMPLEMENTATION"] = "python"
+
+# Fix the older SQLite version on Streamlit Cloud hosts
 try:
     import pysqlite3
     sys.modules["sqlite3"] = sys.modules.pop("pysqlite3")
 except ImportError:
     pass
 
-import os
 import streamlit as st
 import chromadb
 import requests
 from chromadb.api.types import EmbeddingFunction
 from langchain_openai import ChatOpenAI
-
-# Force protobuf to fallback if necessary
-os.environ["PROTOCOL_BUFFERS_PYTHON_IMPLEMENTATION"] = "python"
 
 # Securely grab the API key from Streamlit Secrets
 OPENROUTER_API_KEY = st.secrets["OPENROUTER_API_KEY"]
