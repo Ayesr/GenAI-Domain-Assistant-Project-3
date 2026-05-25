@@ -1,10 +1,10 @@
 streamlit==1.37.0
-openai==1.40.0
+openai
 python-dotenv==1.0.1
 
 langchain==0.2.14
 langchain-community==0.2.12
-langchain-openai==0.1.22
+langchain-openai
 
 chromadb==0.5.0
 pysqlite3-binary
@@ -12,6 +12,7 @@ pysqlite3-binary
 protobuf
 tiktoken==0.7.0
 requests==2.32.3
+httpx==0.27.2
 numpy==1.26.4
 pandas==2.2.2
 pypdf==4.3.1
