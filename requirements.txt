@@ -9,7 +9,7 @@ langchain-openai==0.1.22
 langchain-openrouter==0.1.0
 
 chromadb==0.5.0
-hnswlib==0.8.0
+
 protobuf==4.25.3
 
 tiktoken==0.7.0
