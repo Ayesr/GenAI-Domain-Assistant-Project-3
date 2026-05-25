@@ -1,32 +1,44 @@
+# =========================================================
+# 1. SYSTEM PATCH: CHROMADB SQLITE FIX FOR STREAMLIT CLOUD
+# =========================================================
+import sys
+try:
+    import pysqlite3
+    sys.modules["sqlite3"] = sys.modules.pop("pysqlite3")
+except ImportError:
+    pass
+
 import os
 import streamlit as st
 import chromadb
 import requests
 from chromadb.api.types import EmbeddingFunction
 from langchain_openai import ChatOpenAI
-from langchain_openrouter import ChatOpenRouter
 
 # Force protobuf to fallback if necessary
 os.environ["PROTOCOL_BUFFERS_PYTHON_IMPLEMENTATION"] = "python"
 
 # Securely grab the API key from Streamlit Secrets
-# (Make sure OPENROUTER_API_KEY is added to your app secrets in the dashboard)
 OPENROUTER_API_KEY = st.secrets["OPENROUTER_API_KEY"]
 
+
 # =========================================================
-# LLM INITIALIZATION
+# 2. LLM INITIALIZATION (Configured safely for OpenRouter)
 # =========================================================
 @st.cache_resource
 def init_llm():
-    return ChatOpenRouter(
-        openrouter_api_key=OPENROUTER_API_KEY,
-        model="meta-llama/llama-3-70b-instruct",  # Or your preferred model path
+    return ChatOpenAI(
+        base_url="https://openrouter.ai/api/v1",
+        api_key=OPENROUTER_API_KEY,
+        # This string tricks Pydantic into passing internal OpenAI token validation
+        openai_api_key="placeholder-to-bypass-pydantic-validation", 
+        model="meta-llama/llama-3-70b-instruct",  
         temperature=0.7
     )
 
 
 # =========================================================
-# EMBEDDINGS (OpenRouter)
+# 3. EMBEDDINGS (OpenRouter)
 # =========================================================
 class OpenRouterEmbeddingFunction(EmbeddingFunction):
     def __init__(self, api_key, model="openai/text-embedding-3-small"):
@@ -34,7 +46,6 @@ class OpenRouterEmbeddingFunction(EmbeddingFunction):
         self.model = model
 
     def __call__(self, input):
-        # Handle single strings or lists of strings smoothly
         if isinstance(input, str):
             input = [input]
             
@@ -55,12 +66,11 @@ class OpenRouterEmbeddingFunction(EmbeddingFunction):
 
 
 # =========================================================
-# CHROMADB
+# 4. CHROMADB INITIALIZATION
 # =========================================================
 @st.cache_resource
 def init_chromadb():
     client = chromadb.PersistentClient(path="./chroma_db")
-
     embedding_fn = OpenRouterEmbeddingFunction(api_key=OPENROUTER_API_KEY)
 
     return client.get_or_create_collection(
@@ -75,7 +85,7 @@ llm = init_llm()
 
 
 # =========================================================
-# RAG LOGIC
+# 5. RAG LOGIC
 # =========================================================
 def get_rag_response(query, n_results=3):
     results = collection.query(query_texts=[query], n_results=n_results)
@@ -101,7 +111,7 @@ def get_rag_response(query, n_results=3):
 
 
 # =========================================================
-# STREAMLIT UI
+# 6. STREAMLIT UI
 # =========================================================
 st.title("Company Knowledge Assistant")
 
