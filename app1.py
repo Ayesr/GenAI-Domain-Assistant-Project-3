@@ -167,4 +167,12 @@ with st.sidebar:
     st.divider()
 
     # 🏢 DIRECT FOLDER/FILE INGESTION CONTROL INTERFACE
-    st.subheader("📁
+    # 🏢 DIRECT FOLDER/FILE INGESTION CONTROL INTERFACE
+    st.subheader("Upload Company Knowledge")
+    
+    # Drag and drop or browse multiple files simultaneously
+    uploaded_files = st.file_uploader(
+        "Select PDF or TXT files", 
+        type=["pdf", "txt"], 
+        accept_multiple_files=True
+    )
